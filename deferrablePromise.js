@@ -22,25 +22,44 @@ setTimeout(()=> t.delay(2000),100);
 class DeferredPromise{
    callback;
    timeout;
-   thenCallback = [];
-   
-   constructor(){
-   }
+   thenCallback = [];  
+   catchCallbacks = [];
+   finallyCallbacks = [];
    
   then(fx){
       this.thenCallback.push(fx);
       return this;
+  }  
+
+  catch(fx){
+    this.catchCallbacks.push(fx);
+    return this;
   }
+
+   finally(fx){      
+      this.finallyCallbacks.push(fx);
+      return this;
+   }
 
   wait(fx, milliseconds){
       this.callback = fx;
       var that = this;
       this.timeout = setTimeout(() => {
-         var results = that.callback();
-         for(var i=0; i<that.thenCallback.length; i++){
-            that.thenCallback[i](results);
+         try{
+            var results = that.callback();
+            for(var i=0; i<that.thenCallback.length; i++){
+               console.log(i);
+               results = that.thenCallback[i](results);
+            }            
+         }catch(ex){
+            for(var i=0; i<that.catchCallbacks.length; i++){
+               that.catchCallbacks[i](ex);
+            }            
          }
-      },milliseconds);
+         for(var i=0; i<that.finallyCallbacks.length; i++){
+            that.finallyCallback();
+         }
+      }, milliseconds);
   }
 
   delay(milliseconds){
@@ -48,8 +67,17 @@ class DeferredPromise{
       this.wait(this.callback, milliseconds);
   }   
 }
-//EXAMPLE
+
+//EXAMPLE THEN
 var d = new DeferredPromise();
-d.then((a)=> console.log("THEN FX", a)).then((a) => console.log("after then", a));
-d.wait(() => {alert("passed FX"); return "i returned data";}, 1000);
+d.then((a)=> {console.log("THEN FX", a); return "changed data";}).then((a) => console.log("after then", a));
+d.catch(console.warn);
+d.wait(() => {alert("passed FX"); return "i changed data";}, 1000);
+setTimeout(()=> d.delay(4000), 999);
+
+//EXAMPLE CATCH
+var d = new DeferredPromise();
+d.then((a)=> {console.log("THEN FX", a); return "changed data";}).then((a) => console.log("after then", a));
+d.catch(console.warn);
+d.wait(() => {alert("passed FX"); throw "i returned data";}, 1000);
 setTimeout(()=> d.delay(4000), 999);
