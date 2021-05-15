@@ -17,3 +17,31 @@ class Task{
 var t = new Task();
 t.wait(()=> alert('hi'),100);
 setTimeout(()=> t.delay(2000),100);
+
+
+class DeferredPromise{
+   callback;
+   timeout;
+   thenCallback;
+   
+   constructor(){
+   }
+   
+  then(fx){
+      this.thenCallback = fx;
+      return this;
+  }
+
+  wait(fx, milliseconds){
+      this.callback = fx;
+      this.timeout = setTimeout(() => {
+         var results = this.callback();
+         this.thenCallback(results);
+      },milliseconds);
+  }
+
+  delay(milliseconds){
+      clearTimeout(timeout);
+      this.timeout = setTimeout(this.callback,milliseconds);
+  }   
+}
