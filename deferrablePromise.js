@@ -13,7 +13,7 @@ class Task{
    
 }
 
-
+//EXAMPLE
 var t = new Task();
 t.wait(()=> alert('hi'),100);
 setTimeout(()=> t.delay(2000),100);
@@ -22,13 +22,13 @@ setTimeout(()=> t.delay(2000),100);
 class DeferredPromise{
    callback;
    timeout;
-   thenCallback;
+   thenCallback = [];
    
    constructor(){
    }
    
   then(fx){
-      this.thenCallback = fx;
+      this.thenCallback.push(fx);
       return this;
   }
 
@@ -37,12 +37,19 @@ class DeferredPromise{
       var that = this;
       this.timeout = setTimeout(() => {
          var results = that.callback();
-         that.thenCallback(results);
+         for(var i=0; i<that.thenCallback.length; i++){
+            that.thenCallback[i](results);
+         }
       },milliseconds);
   }
 
   delay(milliseconds){
-      clearTimeout(timeout);
-      this.timeout = setTimeout(this.callback,milliseconds);
+      clearTimeout(this.timeout);
+      this.wait(this.callback, milliseconds);
   }   
 }
+//EXAMPLE
+var d = new DeferredPromise();
+d.then((a)=> console.log("THEN FX", a)).then((a) => console.log("after then", a));
+d.wait(() => {alert("passed FX"); return "i returned data";}, 1000);
+setTimeout(()=> d.delay(4000), 999);
