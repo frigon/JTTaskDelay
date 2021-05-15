@@ -1,24 +1,3 @@
-class Task{ 
-   _timeout;
-   _fx;
-  wait(fx, milliseconds){
-      this._fx = fx;
-      this._timeout = setTimeout(fx,milliseconds);
-  }
-
-  delay(milliseconds){
-      clearTimeout(this._timeout);
-      this._timeout = setTimeout(this._fx,milliseconds);
-  }
-   
-}
-
-//EXAMPLE
-var t = new Task();
-t.wait(()=> alert('hi'),100);
-setTimeout(()=> t.delay(2000),100);
-
-
 class DeferredPromise{
    callback;
    timeout;
@@ -57,7 +36,7 @@ class DeferredPromise{
             }            
          }
          for(var i=0; i<that.finallyCallbacks.length; i++){
-            that.finallyCallback();
+            that.finallyCallbacks[i]();
          }
       }, milliseconds);
   }
@@ -73,11 +52,13 @@ var d = new DeferredPromise();
 d.then((a)=> {console.log("THEN FX", a); return "changed data";}).then((a) => console.log("after then", a));
 d.catch(console.warn);
 d.wait(() => {alert("passed FX"); return "i changed data";}, 1000);
+d.finally(() => alert("finally success call"));
 setTimeout(()=> d.delay(4000), 999);
 
 //EXAMPLE CATCH
-var d = new DeferredPromise();
-d.then((a)=> {console.log("THEN FX", a); return "changed data";}).then((a) => console.log("after then", a));
-d.catch(console.warn);
-d.wait(() => {alert("passed FX"); throw "i returned data";}, 1000);
-setTimeout(()=> d.delay(4000), 999);
+var d2 = new DeferredPromise();
+d2.then((a)=> {console.log("THEN FX", a); return "changed data";}).then((a) => console.log("after then", a));
+d2.catch(console.warn);
+d2.wait(() => {alert("passed FX"); throw "i returned data";}, 1000);
+d2.finally(() => alert("finally error call"));
+setTimeout(()=> d2.delay(4000), 999);
