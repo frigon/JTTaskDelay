@@ -34,9 +34,10 @@ class DeferredPromise{
 
   wait(fx, milliseconds){
       this.callback = fx;
+      var that = this;
       this.timeout = setTimeout(() => {
-         var results = this.callback();
-         this.thenCallback(results);
+         var results = that.callback();
+         that.thenCallback(results);
       },milliseconds);
   }
 
